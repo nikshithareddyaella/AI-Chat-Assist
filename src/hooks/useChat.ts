@@ -170,6 +170,26 @@ export function useChat() {
     setError(null);
   }, []);
 
+  const clearChat = useCallback(() => {
+    if (isLoading) {
+      return;
+    }
+
+    const conversationId = store.activeConversationId;
+    if (!conversationId || !getActiveConversation(store)) {
+      return;
+    }
+
+    persistStore(
+      withUpdatedConversation(store, conversationId, (conversation) => ({
+        ...conversation,
+        title: "New chat",
+        messages: [],
+      })),
+    );
+    setError(null);
+  }, [isLoading, persistStore, store]);
+
   const requestJsonReply = useCallback(
     async (message: string, history: Pick<ChatMessage, "role" | "content">[]) => {
       const response = await fetch("/api/chat", {
@@ -425,6 +445,7 @@ export function useChat() {
     startNewChat,
     selectConversation,
     deleteConversation,
+    clearChat,
     dismissError,
   };
 }

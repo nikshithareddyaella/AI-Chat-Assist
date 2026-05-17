@@ -22,6 +22,7 @@ export function ChatApp() {
     startNewChat,
     selectConversation,
     deleteConversation,
+    clearChat,
     dismissError,
     editMessage,
   } = useChat();
@@ -46,7 +47,9 @@ export function ChatApp() {
           title={headerTitle}
           isLoading={isLoading}
           streamPhase={streamPhase}
+          canClearChat={messages.length > 0}
           onMenuClick={() => setSidebarOpen(true)}
+          onClearChat={clearChat}
         />
 
         {error ? (
