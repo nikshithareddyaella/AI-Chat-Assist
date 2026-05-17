@@ -194,49 +194,12 @@ export function useChat() {
     [],
   );
 
-  const sendMessage = useCallback(
-    async (rawMessage: string) => {
-      const validationError = validateMessage(rawMessage);
-      if (validationError) {
-        setError(validationError);
-        return;
-      }
-
-      let activeId = store.activeConversationId;
-      let workingStore = store;
-
-      if (!activeId || !getActiveConversation(store)) {
-        const conversation = createConversation();
-        activeId = conversation.id;
-        workingStore = {
-          activeConversationId: conversation.id,
-          conversations: [conversation, ...store.conversations],
-        };
-        persistStore(workingStore);
-      }
-
-      const message = rawMessage.trim();
-      const userMessage = createMessage("user", message);
-      const conversationId = activeId;
-
-      let historyForApi: Pick<ChatMessage, "role" | "content">[] = [];
-
-      const storeWithUser = withUpdatedConversation(workingStore, conversationId, (conversation) => {
-        historyForApi = conversation.messages.map(({ role, content }) => ({ role, content }));
-        const nextMessages = [...conversation.messages, userMessage];
-        const title =
-          conversation.title === "New chat"
-            ? createConversationTitle(message)
-            : conversation.title;
-
-        return {
-          ...conversation,
-          title,
-          messages: nextMessages,
-        };
-      });
-
-      persistStore(storeWithUser);
+  const requestAssistantReply = useCallback(
+    async (
+      conversationId: string,
+      message: string,
+      historyForApi: Pick<ChatMessage, "role" | "content">[],
+    ) => {
       setIsLoading(true);
       setStreamPhase("thinking");
       setError(null);
@@ -349,7 +312,104 @@ export function useChat() {
         setStreamPhase("idle");
       }
     },
-    [commitStore, persistStore, requestJsonReply, store],
+    [commitStore, requestJsonReply],
+  );
+
+  const sendMessage = useCallback(
+    async (rawMessage: string) => {
+      const validationError = validateMessage(rawMessage);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+
+      let activeId = store.activeConversationId;
+      let workingStore = store;
+
+      if (!activeId || !getActiveConversation(store)) {
+        const conversation = createConversation();
+        activeId = conversation.id;
+        workingStore = {
+          activeConversationId: conversation.id,
+          conversations: [conversation, ...store.conversations],
+        };
+        persistStore(workingStore);
+      }
+
+      const message = rawMessage.trim();
+      const userMessage = createMessage("user", message);
+      const conversationId = activeId;
+
+      let historyForApi: Pick<ChatMessage, "role" | "content">[] = [];
+
+      const storeWithUser = withUpdatedConversation(workingStore, conversationId, (conversation) => {
+        historyForApi = conversation.messages.map(({ role, content }) => ({ role, content }));
+        const nextMessages = [...conversation.messages, userMessage];
+        const title =
+          conversation.title === "New chat"
+            ? createConversationTitle(message)
+            : conversation.title;
+
+        return {
+          ...conversation,
+          title,
+          messages: nextMessages,
+        };
+      });
+
+      persistStore(storeWithUser);
+      await requestAssistantReply(conversationId, message, historyForApi);
+    },
+    [persistStore, requestAssistantReply, store],
+  );
+
+  const editMessage = useCallback(
+    async (messageId: string, rawMessage: string) => {
+      if (isLoading) {
+        return;
+      }
+
+      const validationError = validateMessage(rawMessage);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+
+      const conversationId = store.activeConversationId;
+      const conversation = getActiveConversation(store);
+
+      if (!conversationId || !conversation) {
+        return;
+      }
+
+      const messageIndex = conversation.messages.findIndex((entry) => entry.id === messageId);
+      if (messageIndex < 0 || conversation.messages[messageIndex]?.role !== "user") {
+        return;
+      }
+
+      const message = rawMessage.trim();
+      const historyForApi = conversation.messages
+        .slice(0, messageIndex)
+        .map(({ role, content }) => ({ role, content }));
+
+      const firstUserIndex = conversation.messages.findIndex((entry) => entry.role === "user");
+      const shouldRetitle = messageIndex === firstUserIndex;
+
+      const storeWithEdit = withUpdatedConversation(store, conversationId, (current) => {
+        const updatedUser = { ...current.messages[messageIndex], content: message };
+        const nextMessages = [...current.messages.slice(0, messageIndex), updatedUser];
+
+        return {
+          ...current,
+          title: shouldRetitle ? createConversationTitle(message) : current.title,
+          messages: nextMessages,
+        };
+      });
+
+      persistStore(storeWithEdit);
+      await requestAssistantReply(conversationId, message, historyForApi);
+    },
+    [isLoading, persistStore, requestAssistantReply, store],
   );
 
   return {
@@ -361,6 +421,7 @@ export function useChat() {
     error,
     hydrated,
     sendMessage,
+    editMessage,
     startNewChat,
     selectConversation,
     deleteConversation,

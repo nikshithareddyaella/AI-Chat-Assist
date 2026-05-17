@@ -23,6 +23,7 @@ export function ChatApp() {
     selectConversation,
     deleteConversation,
     dismissError,
+    editMessage,
   } = useChat();
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId) ?? null;
@@ -62,6 +63,7 @@ export function ChatApp() {
             streamPhase={streamPhase}
             hydrated={hydrated}
             onSuggestion={sendMessage}
+            onEditMessage={editMessage}
           />
           <ChatInput onSend={sendMessage} isLoading={isLoading} />
         </main>

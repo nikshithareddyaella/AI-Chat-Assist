@@ -13,6 +13,7 @@ interface MessageListProps {
   streamPhase: StreamPhase;
   hydrated: boolean;
   onSuggestion: (text: string) => void;
+  onEditMessage?: (messageId: string, content: string) => void;
 }
 
 export function MessageList({
@@ -21,6 +22,7 @@ export function MessageList({
   streamPhase,
   hydrated,
   onSuggestion,
+  onEditMessage,
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +54,12 @@ export function MessageList({
 
             return (
               <li key={message.id}>
-                <MessageBubble message={message} isStreaming={isStreamingAssistant} />
+                <MessageBubble
+                  message={message}
+                  isStreaming={isStreamingAssistant}
+                  isLoading={isLoading}
+                  onEditMessage={onEditMessage}
+                />
               </li>
             );
           })}

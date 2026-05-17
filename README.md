@@ -69,10 +69,35 @@ A responsive AI chat assistant built with **Next.js**, **TypeScript**, **Tailwin
 
 ## Deploy (Vercel)
 
-1. Push this repo to GitHub.
-2. Import the project on [Vercel](https://vercel.com).
-3. Add `GEMINI_API_KEY` (and optional `GEMINI_MODEL`) in project environment variables.
-4. Deploy.
+1. Push this repo to GitHub ([AI-Chat-Assist](https://github.com/nikshithareddyaella/AI-Chat-Assist)).
+2. Import the project on [Vercel](https://vercel.com/new) and select the repository.
+3. Add environment variables (Project → Settings → Environment Variables):
+
+   **Groq (recommended):**
+
+   ```env
+   AI_PROVIDER=groq
+   GROQ_API_KEY=your_groq_key_here
+   GROQ_MODEL=llama-3.3-70b-versatile
+   ```
+
+   **Or Gemini:**
+
+   ```env
+   AI_PROVIDER=gemini
+   GEMINI_API_KEY=your_key_here
+   GEMINI_MODEL=gemini-2.5-flash
+   ```
+
+4. Deploy. Vercel runs `npm run build` automatically for Next.js.
+
+**CLI (optional):** with [Vercel CLI](https://vercel.com/docs/cli) installed and logged in:
+
+```bash
+npx vercel --prod
+```
+
+Add the same env vars when prompted or in the Vercel dashboard before the first production deploy.
 
 ## Architecture
 

@@ -1,3 +1,4 @@
+import { CodeBlock } from "@/components/CodeBlock";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
@@ -21,11 +22,7 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
         h3: ({ children }) => (
           <h3 className="mb-2 mt-3 text-base font-semibold text-zinc-100 first:mt-0">{children}</h3>
         ),
-        pre: ({ children }) => (
-          <pre className="my-3 overflow-x-auto rounded-xl border border-white/10 bg-zinc-950 p-4 text-sm leading-relaxed text-zinc-200">
-            {children}
-          </pre>
-        ),
+        pre: ({ children }) => <CodeBlock>{children}</CodeBlock>,
         code: ({ className, children, ...props }) => {
           const isBlock = Boolean(className);
           if (isBlock) {
