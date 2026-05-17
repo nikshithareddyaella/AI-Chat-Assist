@@ -6,15 +6,25 @@ import { PencilIcon } from "@/components/icons";
 interface MessageActionsProps {
   content: string;
   canEdit: boolean;
+  align?: "start" | "end";
   onEdit: () => void;
 }
 
 const actionButtonClass =
   "inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-zinc-500 transition hover:bg-white/5 hover:text-zinc-300";
 
-export function MessageActions({ content, canEdit, onEdit }: MessageActionsProps) {
+export function MessageActions({
+  content,
+  canEdit,
+  align = "start",
+  onEdit,
+}: MessageActionsProps) {
   return (
-    <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
+    <div
+      className={`mt-1 flex items-center gap-1 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100 ${
+        align === "end" ? "justify-end" : "justify-start"
+      }`}
+    >
       <CopyButton
         text={content}
         label="Copy message"

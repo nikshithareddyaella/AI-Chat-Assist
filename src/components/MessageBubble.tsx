@@ -24,6 +24,7 @@ export function MessageBubble({
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(message.content);
   const canEdit = isUser && !isLoading && !isStreaming && Boolean(onEditMessage);
+  const showActions = !isEditing && !isStreaming && message.content.length > 0;
 
   const cancelEdit = () => {
     setDraft(message.content);
@@ -61,24 +62,12 @@ export function MessageBubble({
 
       <div className={`min-w-0 flex-1 ${isUser ? "flex flex-col items-end" : ""}`}>
         <div
-          className={`mb-1.5 flex w-full items-center gap-2 text-xs text-zinc-500 ${
-            isUser ? "flex-row-reverse" : "justify-between"
+          className={`mb-1.5 flex items-center gap-2 text-xs text-zinc-500 ${
+            isUser ? "flex-row-reverse" : ""
           }`}
         >
-          <div className={`flex items-center gap-2 ${isUser ? "flex-row-reverse" : ""}`}>
-            <span className="font-medium text-zinc-400">{isUser ? "You" : "Assistant"}</span>
-            <MessageTimestamp createdAt={message.createdAt} />
-          </div>
-          {!isEditing && !isStreaming ? (
-            <MessageActions
-              content={message.content}
-              canEdit={canEdit}
-              onEdit={() => {
-                setDraft(message.content);
-                setIsEditing(true);
-              }}
-            />
-          ) : null}
+          <span className="font-medium text-zinc-400">{isUser ? "You" : "Assistant"}</span>
+          <MessageTimestamp createdAt={message.createdAt} />
         </div>
 
         {isEditing ? (
@@ -109,27 +98,41 @@ export function MessageBubble({
             </div>
           </div>
         ) : (
-          <div
-            className={`max-w-full rounded-2xl px-4 py-3 text-[0.9375rem] leading-relaxed sm:max-w-[90%] ${
-              isUser
-                ? "bg-zinc-800 text-zinc-100 ring-1 ring-white/10"
-                : "bg-transparent text-zinc-200"
-            }`}
-          >
-            {isUser ? (
-              <p className="whitespace-pre-wrap">{message.content}</p>
-            ) : (
-              <>
-                <MarkdownContent content={message.content} />
-                {isStreaming ? (
-                  <span
-                    className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-violet-400 align-middle"
-                    aria-hidden="true"
-                  />
-                ) : null}
-              </>
-            )}
-          </div>
+          <>
+            <div
+              className={`max-w-full rounded-2xl px-4 py-3 text-[0.9375rem] leading-relaxed sm:max-w-[90%] ${
+                isUser
+                  ? "bg-zinc-800 text-zinc-100 ring-1 ring-white/10"
+                  : "bg-transparent text-zinc-200"
+              }`}
+            >
+              {isUser ? (
+                <p className="whitespace-pre-wrap">{message.content}</p>
+              ) : (
+                <>
+                  <MarkdownContent content={message.content} />
+                  {isStreaming ? (
+                    <span
+                      className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-violet-400 align-middle"
+                      aria-hidden="true"
+                    />
+                  ) : null}
+                </>
+              )}
+            </div>
+
+            {showActions ? (
+              <MessageActions
+                content={message.content}
+                canEdit={canEdit}
+                align={isUser ? "end" : "start"}
+                onEdit={() => {
+                  setDraft(message.content);
+                  setIsEditing(true);
+                }}
+              />
+            ) : null}
+          </>
         )}
       </div>
     </article>

@@ -47,7 +47,6 @@ export function ChatApp() {
           isLoading={isLoading}
           streamPhase={streamPhase}
           onMenuClick={() => setSidebarOpen(true)}
-          onNewChat={startNewChat}
         />
 
         {error ? (
