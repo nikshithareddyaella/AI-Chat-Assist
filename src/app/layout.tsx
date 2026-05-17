@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AI Chat Assist",
-  description: "A responsive AI chat assistant built with Next.js and Google Gemini",
+  description:
+    "AI chat assistant with streaming replies, conversation history, and Gemini or Groq on the server.",
 };
 
 export default function RootLayout({

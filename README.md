@@ -1,20 +1,20 @@
 # AI Chat Assist
 
-A responsive AI chat assistant built with **Next.js**, **TypeScript**, **Tailwind CSS**, and **Google Gemini**. Includes loading states, error handling, session chat history (`localStorage`), markdown rendering, and unit tests.
+A responsive AI chat app built with **Next.js**, **TypeScript**, and **Tailwind CSS**. Supports streaming replies, multi-conversation history, markdown, and server-side **Gemini** or **Groq** providers.
 
 ## Features
 
-- Chat UI with text input and send button
-- Server-side API route (API key never exposed to the browser)
-- Dynamic message rendering without page reload
-- Loading indicator and error banners
-- Persistent session history + clear chat
-- Markdown support for assistant replies (GFM + sanitization)
+- Chat UI with streaming responses and loading states
+- Server-side `/api/chat` route (API keys never exposed to the browser)
+- Multi-conversation sidebar with `localStorage` persistence
+- Copy messages and code blocks; edit user messages and resend
+- Markdown rendering for assistant replies (GFM + sanitization)
+- Unit tests (Vitest)
 
 ## Prerequisites
 
 - Node.js 18+
-- **Groq**: [console.groq.com/keys](https://console.groq.com/keys) — free, no credit card
+- **Groq**: [console.groq.com/keys](https://console.groq.com/keys) — free tier available
 - **Gemini** (optional): [Google AI Studio](https://aistudio.google.com/apikey)
 
 ## Setup
@@ -31,7 +31,7 @@ A responsive AI chat assistant built with **Next.js**, **TypeScript**, **Tailwin
    cp .env.example .env.local
    ```
 
-   **If you see Gemini 429 / quota errors**, use Groq:
+   **Groq (recommended if Gemini quota errors):**
 
    ```env
    AI_PROVIDER=groq
@@ -39,7 +39,7 @@ A responsive AI chat assistant built with **Next.js**, **TypeScript**, **Tailwin
    GROQ_MODEL=llama-3.3-70b-versatile
    ```
 
-   Or use Gemini (default model `gemini-2.5-flash`):
+   **Gemini:**
 
    ```env
    AI_PROVIDER=gemini
@@ -57,15 +57,15 @@ A responsive AI chat assistant built with **Next.js**, **TypeScript**, **Tailwin
 
 4. Open [http://localhost:3000](http://localhost:3000)
 
-## Scripts
+## npm commands
 
-| Command        | Description              |
-|----------------|--------------------------|
-| `npm run dev`  | Start dev server         |
-| `npm run build`| Production build         |
-| `npm run start`| Run production server    |
-| `npm run test` | Run unit tests           |
-| `npm run lint` | Run ESLint               |
+| Command          | Description           |
+| ---------------- | --------------------- |
+| `npm run dev`    | Start dev server      |
+| `npm run build`  | Production build      |
+| `npm run start`  | Run production server |
+| `npm run test`   | Run unit tests        |
+| `npm run lint`   | Run ESLint            |
 
 ## Deploy (Vercel)
 
@@ -89,7 +89,7 @@ A responsive AI chat assistant built with **Next.js**, **TypeScript**, **Tailwin
    GEMINI_MODEL=gemini-2.5-flash
    ```
 
-4. Deploy. Vercel runs `npm run build` automatically for Next.js.
+4. Deploy. Vercel detects Next.js and runs `npm run build` automatically.
 
 **CLI (optional):** with [Vercel CLI](https://vercel.com/docs/cli) installed and logged in:
 
@@ -97,24 +97,22 @@ A responsive AI chat assistant built with **Next.js**, **TypeScript**, **Tailwin
 npx vercel --prod
 ```
 
-Add the same env vars when prompted or in the Vercel dashboard before the first production deploy.
-
 ## Architecture
 
 ```text
-Browser (React client components)
-  → POST /api/chat
-  → Gemini API (server-side)
-  → JSON reply → UI updates via React state
+Browser (React client)
+  → POST /api/chat (SSE stream or JSON)
+  → Gemini / Groq (server-side)
+  → UI updates via React state + localStorage
 ```
 
-Chat history is stored in `localStorage` on the client only.
+Chat history is stored in the browser only (`localStorage`).
 
 ## Tech stack
 
 - Next.js 16 (App Router)
 - React 19 + TypeScript
 - Tailwind CSS 4
-- Google Generative AI SDK
+- Google Generative AI SDK + Groq REST API
 - react-markdown + remark-gfm + rehype-sanitize
 - Vitest + React Testing Library
