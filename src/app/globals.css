@@ -103,3 +103,16 @@ body {
     0 0 0 1px rgba(139, 92, 246, 0.3),
     0 8px 32px -8px rgba(139, 92, 246, 0.25);
 }
+
+/* Chat input: scroll when tall, no visible scrollbar */
+.composer-input {
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.composer-input::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}

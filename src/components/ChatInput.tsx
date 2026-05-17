@@ -69,7 +69,7 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
             }}
             placeholder="Message AI Chat Assist…"
             disabled={isLoading}
-            className="max-h-40 min-h-6 flex-1 resize-none bg-transparent px-3 py-2.5 text-[0.9375rem] leading-relaxed text-zinc-100 placeholder:text-zinc-600 outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="composer-input max-h-40 min-h-6 flex-1 resize-none bg-transparent px-3 py-2.5 text-[0.9375rem] leading-relaxed text-zinc-100 placeholder:text-zinc-600 outline-none disabled:cursor-not-allowed disabled:opacity-50"
           />
           <button
             type="submit"
