@@ -1,118 +1,218 @@
-# AI Chat Assist
+# 🤖 AI Chat Assist
 
-A responsive AI chat app built with **Next.js**, **TypeScript**, and **Tailwind CSS**. Supports streaming replies, multi-conversation history, markdown, and server-side **Gemini** or **Groq** providers.
+> A modern AI-powered chat assistant built with **Next.js**, **TypeScript**, and **Groq/Gemini APIs**, featuring persistent chat history, markdown rendering, responsive UI, and robust error handling.
 
-## Features
+![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.x-06B6D4?logo=tailwindcss&logoColor=white)
 
-- Chat UI with streaming responses and loading states
-- Server-side `/api/chat` route (API keys never exposed to the browser)
-- Multi-conversation sidebar with `localStorage` persistence
-- Copy messages and code blocks; edit user messages and resend
-- Markdown rendering for assistant replies (GFM + sanitization)
-- Unit tests (Vitest)
+---
 
-## Prerequisites
+## 📋 Table of Contents
 
-- Node.js 18+
-- **Groq**: [console.groq.com/keys](https://console.groq.com/keys) — free tier available
-- **Gemini** (optional): [Google AI Studio](https://aistudio.google.com/apikey)
+- [Project Overview](#project-overview)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Tech Stack](#tech-stack)
+- [Environment Variables](#environment-variables)
+- [Installation & Setup](#installation--setup)
+- [Running the Application](#running-the-application)
+- [Testing](#testing)
+- [Best Practices Followed](#best-practices-followed)
+- [Future Improvements](#future-improvements)
 
-## Setup
+---
 
-1. Install dependencies:
+# 🚀 Project Overview
 
-   ```bash
-   npm install
-   ```
+AI Chat Assist is a responsive and interactive AI chat application where users can communicate with an AI model in real time.
 
-2. Copy the environment template and add your keys:
+The application was developed as part of a Front-End Engineering assessment and includes:
 
-   ```bash
-   cp .env.example .env.local
-   ```
+- Clean and intuitive UI
+- AI API integration
+- Dynamic response rendering
+- State management
+- Persistent chat history
+- Markdown rendering
+- Error handling
+- Unit testing
+- Responsive design
 
-   **Groq (recommended if Gemini quota errors):**
+---
 
-   ```env
-   AI_PROVIDER=groq
-   GROQ_API_KEY=your_groq_key_here
-   GROQ_MODEL=llama-3.3-70b-versatile
-   ```
+# ✨ Features
 
-   **Gemini:**
+## ✅ Core Features
 
-   ```env
-   AI_PROVIDER=gemini
-   GEMINI_API_KEY=your_key_here
-   GEMINI_MODEL=gemini-2.5-flash
-   ```
+- 💬 Real-time AI conversation interface
+- ⚡ Dynamic response rendering without page refresh
+- 🔄 Loading states and API error handling
+- 🧠 AI integration using Groq/Gemini APIs
+- 🧩 Component-based architecture
+- 📱 Fully responsive UI
+- 🔒 Secure API handling using backend routes
+- 📝 Markdown rendering support
+- 🗂 Persistent chat history using Local Storage
+- 🧹 Clear Chat / Delete Chat functionality
 
-   If both keys are set, Gemini quota errors automatically fall back to Groq.
+## 🎯 Bonus Features Implemented
 
-3. Run the development server:
+- Markdown response rendering
+- Persistent session history
+- Session management
+- Unit testing
+- Clean reusable components
+- Responsive layout and semantic HTML
 
-   ```bash
-   npm run dev
-   ```
+---
 
-4. Open [http://localhost:3000](http://localhost:3000)
+# 🔧 Prerequisites
 
-## npm commands
+Ensure the following tools are installed before running the project:
 
-| Command          | Description           |
-| ---------------- | --------------------- |
-| `npm run dev`    | Start dev server      |
-| `npm run build`  | Production build      |
-| `npm run start`  | Run production server |
-| `npm run test`   | Run unit tests        |
-| `npm run lint`   | Run ESLint            |
+| 🛠 Tool | 🔢 Version | 🔗 Download |
+| :--- | :--- | :--- |
+| **Node.js** | `18+` | https://nodejs.org |
+| **npm** | `9+` | https://www.npmjs.com |
+| **VS Code** | `Latest` | https://code.visualstudio.com |
 
-## Deploy (Vercel)
+> 🔍 Verify installations using:
 
-1. Push this repo to GitHub ([AI-Chat-Assist](https://github.com/nikshithareddyaella/AI-Chat-Assist)).
-2. Import the project on [Vercel](https://vercel.com/new) and select the repository.
-3. Add environment variables (Project → Settings → Environment Variables):
-
-   **Groq (recommended):**
-
-   ```env
-   AI_PROVIDER=groq
-   GROQ_API_KEY=your_groq_key_here
-   GROQ_MODEL=llama-3.3-70b-versatile
-   ```
-
-   **Or Gemini:**
-
-   ```env
-   AI_PROVIDER=gemini
-   GEMINI_API_KEY=your_key_here
-   GEMINI_MODEL=gemini-2.5-flash
-   ```
-
-4. Deploy. Vercel detects Next.js and runs `npm run build` automatically.
-
-**CLI (optional):** with [Vercel CLI](https://vercel.com/docs/cli) installed and logged in:
-
-```bash
-npx vercel --prod
+```sh
+node -v
+npm -v
 ```
 
-## Architecture
+---
+
+# 🛠 Tech Stack
+
+| 🏷 Technology | Purpose |
+| :--- | :--- |
+| **Next.js** | Frontend framework |
+| **React** | UI library |
+| **TypeScript** | Type safety |
+| **Tailwind CSS** | Styling |
+| **Groq API / Gemini API** | AI integration |
+| **React Markdown** | Markdown rendering |
+| **Local Storage** | Persistent chat history |
+| **Jest / Testing Library** | Unit testing |
+
+---
+
+# 🔐 Environment Variables
+
+Create a `.env.local` file in the project root and configure the following variables:
+
+```env
+AI_PROVIDER=groq or gemini
+
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=groq_model_to_be_used
+
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini_model_to_be_used
+```
+
+## ⚙️ AI Provider Configuration
+
+The application supports both **Groq** and **Google Gemini** AI providers.
+
+- `AI_PROVIDER` determines the primary AI provider to be used.
+- Gemini integration is implemented as an optional provider.
+- If both Gemini and Groq API keys are configured:
+  - The application prioritizes the **Gemini model** first.
+  - Once Gemini API usage limits are reached, the application automatically falls back to the **Groq model** for uninterrupted responses.
+
+This fallback mechanism improves reliability and ensures continuous AI interaction during API quota limitations.
+
+⚠️ **Important:** Never expose API keys directly in frontend/client-side code. Store them securely using environment variables.
+
+---
+
+# 📦 Installation & Setup
+
+Clone the repository:
+
+```sh
+git clone <your-github-repository-url>
+```
+
+Navigate to the project directory:
+
+```sh
+cd AI-Chat-Assist
+```
+
+Install dependencies:
+
+```sh
+npm install
+```
+
+---
+
+# 🚀 Running the Application
+
+Start the development server:
+
+```sh
+npm run dev
+```
+
+Open your browser and navigate to:
 
 ```text
-Browser (React client)
-  → POST /api/chat (SSE stream or JSON)
-  → Gemini / Groq (server-side)
-  → UI updates via React state + localStorage
+http://localhost:3000
 ```
 
-Chat history is stored in the browser only (`localStorage`).
+---
 
-## Tech stack
+# 🧪 Testing
 
-- Next.js 16 (App Router)
-- React 19 + TypeScript
-- Tailwind CSS 4
-- Google Generative AI SDK + Groq REST API
-- react-markdown + remark-gfm + rehype-sanitize
-- Vitest + React Testing Library
+Run unit tests:
+
+```sh
+npm run test
+```
+
+Run lint checks:
+
+```sh
+npm run lint
+```
+
+Create production build:
+
+```sh
+npm run build
+```
+
+---
+
+# ✅ Best Practices Followed
+
+- Component-based architecture
+- TypeScript-based type safety
+- Semantic HTML usage
+- Responsive design principles
+- API abstraction using backend routes
+- Proper loading and error states
+- Persistent state management
+- Reusable UI components
+- Secure environment variable handling
+- Markdown rendering support
+- Basic unit testing coverage
+
+---
+
+# 📈 Future Improvements
+
+- User authentication
+- Conversation export support
+- Streaming optimization
+- Advanced accessibility enhancements
+- Request cancellation support
+- Cloud database integration
+- Multi-model AI support
