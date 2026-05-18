@@ -13,7 +13,7 @@ interface ChatHeaderProps {
 
 function statusLabel(isLoading: boolean, streamPhase: StreamPhase): string {
   if (!isLoading) {
-    return "Ready · Gemini or Groq";
+    return "Ready · Groq API";
   }
 
   if (streamPhase === "thinking") {
