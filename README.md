@@ -8,12 +8,14 @@
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.x-06B6D4?logo=tailwindcss&logoColor=white)
 
 **Live demo:** [https://ai-chat-assist-mu.vercel.app](https://ai-chat-assist-mu.vercel.app)  
-**Repository:** [https://github.com/nikshithareddyaella/AI-Chat-Assist](https://github.com/nikshithareddyaella/AI-Chat-Assist)
+**Repository:** [https://github.com/nikshithareddyaella/AI-Chat-Assist](https://github.com/nikshithareddyaella/AI-Chat-Assist)  
+**Technical documentation (PDF):** [Docs/AIChatAssist_ProjectDocumentation.pdf](./Docs/AIChatAssist_ProjectDocumentation.pdf)
 
 ---
 
 ## 📋 Table of Contents
 
+- [Technical Documentation](#-technical-documentation)
 - [Project Overview](#-project-overview)
 - [Features](#-features)
 - [Prerequisites](#-prerequisites)
@@ -25,6 +27,14 @@
 - [Testing](#-testing)
 - [Best Practices Followed](#-best-practices-followed)
 - [Future Improvements](#-future-improvements)
+
+---
+
+# 📄 Technical Documentation
+
+Full implementation-focused technical documentation (architecture, features, provider configuration, and deployment):
+
+**[AI Chat Assist — Complete Technical Documentation (PDF)](./Docs/AIChatAssist_ProjectDocumentation.pdf)**
 
 ---
 
