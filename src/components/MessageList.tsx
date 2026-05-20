@@ -27,8 +27,10 @@ export function MessageList({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading, streamPhase]);
+    bottomRef.current?.scrollIntoView({
+      behavior: isLoading ? "auto" : "smooth",
+    });
+  }, [messages, isLoading]);
 
   if (!hydrated) {
     return <ChatSkeleton />;
@@ -47,10 +49,7 @@ export function MessageList({
           {messages.map((message, index) => {
             const isLast = index === messages.length - 1;
             const isStreamingAssistant =
-              isLoading &&
-              streamPhase === "streaming" &&
-              isLast &&
-              message.role === "assistant";
+              isLoading && isLast && message.role === "assistant";
 
             return (
               <li key={message.id}>
@@ -63,7 +62,9 @@ export function MessageList({
               </li>
             );
           })}
-          {isLoading && streamPhase === "thinking" ? (
+          {isLoading &&
+          streamPhase === "thinking" &&
+          (messages.length === 0 || messages[messages.length - 1]?.role !== "assistant") ? (
             <li>
               <LoadingIndicator phase="thinking" />
             </li>

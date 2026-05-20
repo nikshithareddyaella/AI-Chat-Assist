@@ -28,6 +28,12 @@ export interface ChatRequestBody {
 
 export type StreamPhase = "idle" | "thinking" | "streaming";
 
+/** Live assistant text while a reply is streaming (not persisted until done). */
+export interface StreamDraft {
+  messageId: string;
+  content: string;
+}
+
 export interface ChatResponseBody {
   reply: string;
 }

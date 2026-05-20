@@ -108,17 +108,21 @@ export function MessageBubble({
             >
               {isUser ? (
                 <p className="whitespace-pre-wrap">{message.content}</p>
-              ) : (
+              ) : isStreaming ? (
                 <>
-                  <MarkdownContent content={message.content} />
-                  {isStreaming ? (
-                    <span
-                      className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-violet-400 align-middle"
-                      aria-hidden="true"
-                    />
+                  {message.content ? (
+                    <p className="whitespace-pre-wrap text-zinc-200">{message.content}</p>
                   ) : null}
+                  <span
+                    className={`inline-block h-4 w-0.5 animate-pulse bg-violet-400 align-middle ${
+                      message.content ? "ml-0.5" : ""
+                    }`}
+                    aria-hidden="true"
+                  />
                 </>
-              )}
+              ) : message.content ? (
+                <MarkdownContent content={message.content} />
+              ) : null}
             </div>
 
             {showActions ? (

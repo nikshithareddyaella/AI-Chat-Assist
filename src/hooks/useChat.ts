@@ -1,14 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   createConversation,
   createConversationTitle,
   getActiveConversation,
 } from "@/lib/conversations";
 import { parseSseStream } from "@/lib/stream/parse-sse";
+import { createUiThrottle } from "@/lib/stream/throttle-ui";
 import { loadChatStore, saveChatStore } from "@/lib/storage";
-import type { ChatErrorBody, ChatMessage, ChatResponseBody, ChatStore, Conversation, StreamPhase } from "@/lib/types";
+import type {
+  ChatErrorBody,
+  ChatMessage,
+  ChatResponseBody,
+  ChatStore,
+  Conversation,
+  StreamDraft,
+  StreamPhase,
+} from "@/lib/types";
 import { validateMessage } from "@/lib/validation";
 
 function generateMessageId(): string {
@@ -75,6 +84,17 @@ function applyAssistantContent(
   });
 }
 
+function removeAssistantMessage(
+  store: ChatStore,
+  conversationId: string,
+  assistantId: string,
+): ChatStore {
+  return withUpdatedConversation(store, conversationId, (conversation) => ({
+    ...conversation,
+    messages: conversation.messages.filter((message) => message.id !== assistantId),
+  }));
+}
+
 export function useChat() {
   const hasRestoredRef = useRef(false);
   const [store, setStore] = useState<ChatStore>({
@@ -83,11 +103,22 @@ export function useChat() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [streamPhase, setStreamPhase] = useState<StreamPhase>("idle");
+  const [streamDraft, setStreamDraft] = useState<StreamDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   const activeConversation = getActiveConversation(store);
   const messages = activeConversation?.messages ?? [];
+
+  const displayMessages = useMemo(() => {
+    if (!streamDraft) {
+      return messages;
+    }
+
+    return messages.map((message) =>
+      message.id === streamDraft.messageId ? { ...message, content: streamDraft.content } : message,
+    );
+  }, [messages, streamDraft]);
 
   const persistStore = useCallback((next: ChatStore) => {
     setStore(next);
@@ -96,15 +127,20 @@ export function useChat() {
     }
   }, []);
 
-  const commitStore = useCallback((updater: (current: ChatStore) => ChatStore) => {
-    setStore((current) => {
-      const next = updater(current);
-      if (hasRestoredRef.current) {
-        saveChatStore(next);
-      }
-      return next;
-    });
-  }, []);
+  const commitStore = useCallback(
+    (updater: (current: ChatStore) => ChatStore, options?: { persist?: boolean }) => {
+      const persist = options?.persist !== false;
+
+      setStore((current) => {
+        const next = updater(current);
+        if (hasRestoredRef.current && persist) {
+          saveChatStore(next);
+        }
+        return next;
+      });
+    },
+    [],
+  );
 
   useEffect(() => {
     const stored = loadChatStore();
@@ -220,15 +256,65 @@ export function useChat() {
       message: string,
       historyForApi: Pick<ChatMessage, "role" | "content">[],
     ) => {
+      const assistantId = generateMessageId();
+      const streamState = { content: "", receivedDelta: false };
+      const draftThrottler = createUiThrottle(48);
+
+      const pushDraftToUi = () => {
+        draftThrottler.schedule(() => {
+          setStreamDraft({ messageId: assistantId, content: streamState.content });
+        });
+      };
+
+      const beginAssistantPlaceholder = () => {
+        commitStore(
+          (current) => {
+            const targetId = current.activeConversationId ?? conversationId;
+            if (!targetId) {
+              return current;
+            }
+
+            return applyAssistantContent(current, targetId, assistantId, "");
+          },
+          { persist: false },
+        );
+        setStreamDraft({ messageId: assistantId, content: "" });
+        setStreamPhase("streaming");
+      };
+
+      const persistAssistantReply = (content: string, persist: boolean) => {
+        commitStore(
+          (current) => {
+            const targetId = current.activeConversationId ?? conversationId;
+            if (!targetId) {
+              return current;
+            }
+
+            return applyAssistantContent(current, targetId, assistantId, content);
+          },
+          { persist },
+        );
+      };
+
+      const finishStream = () => {
+        draftThrottler.flush();
+        draftThrottler.cancel();
+        setStreamDraft(null);
+
+        if (streamState.receivedDelta) {
+          persistAssistantReply(streamState.content, true);
+        }
+      };
+
+      const applyJsonFallback = async () => {
+        const reply = await requestJsonReply(message, historyForApi);
+        persistAssistantReply(reply, true);
+      };
+
       setIsLoading(true);
       setStreamPhase("thinking");
       setError(null);
-
-      const streamState = {
-        assistantId: null as string | null,
-        content: "",
-        receivedDelta: false,
-      };
+      beginAssistantPlaceholder();
 
       try {
         const response = await fetch("/api/chat", {
@@ -259,26 +345,8 @@ export function useChat() {
           if (event.type === "delta" && event.text) {
             streamState.receivedDelta = true;
             setStreamPhase("streaming");
-
-            if (!streamState.assistantId) {
-              streamState.assistantId = generateMessageId();
-            }
-
             streamState.content += event.text;
-
-            commitStore((current) => {
-              const targetId = current.activeConversationId ?? conversationId;
-              if (!targetId) {
-                return current;
-              }
-
-              return applyAssistantContent(
-                current,
-                targetId,
-                streamState.assistantId!,
-                streamState.content,
-              );
-            });
+            pushDraftToUi();
           }
 
           if (event.type === "done") {
@@ -286,39 +354,30 @@ export function useChat() {
           }
         }
 
+        finishStream();
+
         if (!streamState.receivedDelta) {
-          const reply = await requestJsonReply(message, historyForApi);
-          const assistantMessage = createMessage("assistant", reply);
-
-          commitStore((current) => {
-            const targetId = current.activeConversationId ?? conversationId;
-            if (!targetId) {
-              return current;
-            }
-
-            return withUpdatedConversation(current, targetId, (conversation) => ({
-              ...conversation,
-              messages: [...conversation.messages, assistantMessage],
-            }));
-          });
+          await applyJsonFallback();
         }
       } catch (err) {
+        draftThrottler.cancel();
+        setStreamDraft(null);
+
         try {
-          const reply = await requestJsonReply(message, historyForApi);
-          const assistantMessage = createMessage("assistant", reply);
-
-          commitStore((current) => {
-            const targetId = current.activeConversationId ?? conversationId;
-            if (!targetId) {
-              return current;
-            }
-
-            return withUpdatedConversation(current, targetId, (conversation) => ({
-              ...conversation,
-              messages: [...conversation.messages, assistantMessage],
-            }));
-          });
+          await applyJsonFallback();
         } catch (fallbackError) {
+          commitStore(
+            (current) => {
+              const targetId = current.activeConversationId ?? conversationId;
+              if (!targetId) {
+                return current;
+              }
+
+              return removeAssistantMessage(current, targetId, assistantId);
+            },
+            { persist: true },
+          );
+
           const messageText =
             fallbackError instanceof Error
               ? fallbackError.message
@@ -330,6 +389,7 @@ export function useChat() {
       } finally {
         setIsLoading(false);
         setStreamPhase("idle");
+        setStreamDraft(null);
       }
     },
     [commitStore, requestJsonReply],
@@ -433,7 +493,7 @@ export function useChat() {
   );
 
   return {
-    messages,
+    messages: displayMessages,
     conversations: store.conversations,
     activeConversationId: store.activeConversationId,
     isLoading,
