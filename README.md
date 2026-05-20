@@ -42,7 +42,7 @@ Full implementation-focused technical documentation (architecture, features, pro
 
 AI Chat Assist is a responsive AI chat application where users can talk to an AI model with **streaming replies**, similar to mainstream GenAI products.
 
-The application was developed as part of a Front-End Engineering assessment and includes:
+The application includes:
 
 - Clean, custom React UI (Tailwind CSS — no third-party UI component library)
 - Server-side AI API integration (keys never exposed to the browser)
